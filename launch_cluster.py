@@ -111,8 +111,9 @@ ec2=boto3.resource(
     'ec2', 
     region_name='us-east-1', 
     aws_access_key_id=KEY, 
-    aws_secret_access_key=SECRET.
-    aws_session_token=TOKEN)
+    aws_secret_access_key=SECRET,
+    aws_session_token=TOKEN
+    )
     
 vpc = ec2.Vpc(id=PROPERTIES['VpcId'])
 
