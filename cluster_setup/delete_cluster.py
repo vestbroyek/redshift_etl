@@ -3,7 +3,7 @@ import configparser
 import os 
 
 config = configparser.ConfigParser()
-cfg_path = os.path.join(os.getcwd(),'dwh.cfg')
+cfg_path = os.path.join(os.getcwd(),'../dwh.cfg')
 config.read(cfg_path)
 
 # AWS
