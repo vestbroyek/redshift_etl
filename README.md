@@ -7,6 +7,14 @@ The purpose of this project is creating a Redshift data warehouse and creating a
 - Loading them into staging tables
 - Transforming them and creating a final schema
 
+To run the code, you need to
+
+1. Run `launch_cluster.py` to create the cluster
+2. Run `configure_cluster.py` to update the security group
+3. Run `create_tables.py` to create the tables
+4. Run `etl.py` to load the staging tables and insert into the star schema
+5. Run `delete_cluster.py` to delete the cluster
+
 # The cluster
 The first step in this project is to create a Redshift cluster. This is done using boto3, AWS's Python SDK. Having infrastructure configurations as code is a useful way to ensure that infrastructure configuration is maintainable, reproducible, and shareable. 
 
@@ -70,16 +78,16 @@ Before we read in the data, we need to consider the schema.
 ### Staging tables
 First, we'll extract the data into two staging tables, `stg_songs` and `stg_events`. They look like this:
 
-![alt text](screenshots/staging_schema.png "Star schema")
+![alt text](screenshots/staging_schema.png "Staging schema")
 
 ### Star schema and distribution styles
 Now, we can do some data modelling and create a warehouse-style star schema. 
 
-# TODO
+![alt text](screenshots/star_schema.png "Star schema")
 
-We will have one fact table, `songplay`, which contains the raw events. 
+We will have one fact table, marked in blue, `songplay`, which contains the raw events. 
 
-Then there will be dimension tables around it containing further information about 
+Then there will be dimension tables, marked in green, around it, containing further information about 
 * artists
 * songs
 * users
@@ -87,13 +95,17 @@ Then there will be dimension tables around it containing further information abo
 
 A key aspect of Redshift is that we are able to choose sortkeys and distribution styles in order to optimise the cluster's performance.
 
-A **distribution key** decides how the data is distributed across nodes. In this case, we'll 
+A **distribution key** decides how the data is distributed across nodes. 
 
-# TODO
+In this case, we'll choose the distribution style ALL for the time table, as this is likely to be a small table and will be joined on often in analytical queries. This is why it will be performant to have it stored on all nodes, but not too onerous (because it's small). 
 
-A **sort key** 
+All other tables have distribution style KEY, meaning they will be partitioned by one or more keys and spread across nodes. I've chosen the ID column of each as the distribution key on the assumption that this will result in a relatively even spread of data across nodes, and that these tables will likely be, or become, too big to be stored on each node.
 
-# TODO
+Using KEY means that rows with similar values on that field will be placed on the same slice.
+
+I have not tested whether this is more performant than EVEN or AUTO, that would be a useful next step.
+
+A **sort key** decides the order in which data is stored on the nodes. I've only chosen sortkeys in fields that (may) have a meaningful time dimension, as this is likely to be used to sorting in analytical queries. These are `start_time` in the times table and the `session_id` and `start_time` in the songplays table. 
 
 To create our tables, we run `create_tables.py`. All SQL required for this project is in `sql_queries.py`. 
 
@@ -122,5 +134,20 @@ We run these commands to load the data from S3 into our staging tables.
 ## Loading and transforming the data
 Now that the data is in our staging tables, we need to load it into our final schema. We can do this with insert statements, where we select from staging tables and insert the resulting rows.
 
-# TODO
+`etl.py` takes care of both loading in the staging tables and running the insert statements to create the final schema. Once we run it, all our tables will be populated:
+
+![alt text](screenshots/populated_tables.png "Populated tables")
+
+We can also inspect our tables to see that the process has worked, for example, the users table:
+
+![alt text](screenshots/users_example.png "Users table example")
+
+# Final thoughts
+We now have a data warehouse to run analytics on!
+
+Some queries we could run: 
+
+- What's the most played song? 
+- Who is the most popular artist?
+- Who are the 10 most active users?
 
