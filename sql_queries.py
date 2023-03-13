@@ -40,9 +40,8 @@ create table if not exists stg_events (
     status        	integer,
     ts              bigint,
     userAgent      	varchar,
-    userId       	integer,
+    userId       	integer
 
-    primary key(sessionId, itemInSession)
 );
 
 """)
@@ -60,9 +59,7 @@ create table if not exists stg_songs (
 	song_id             varchar,
 	title               varchar,
 	duration            numeric,
-	"year"              integer,
-
-    primary key(song_id, artist_id)
+	"year"              integer
 
 );
 
@@ -104,7 +101,7 @@ song_table_create = ("""
 
 create table if not exists song (
 
-    song_id             int identity(1,1)   primary key distkey,
+    song_id             varchar   primary key distkey,
     title               varchar,
     artist_id           varchar,
     year                smallint,
@@ -118,7 +115,7 @@ artist_table_create = ("""
 
 create table if not exists artist (
 
-    artist_id           int identity(1,1)   primary key distkey,
+    artist_id           varchar   primary key distkey,
     name                varchar,
     location            varchar,
     latitude            varchar,
