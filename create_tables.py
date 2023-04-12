@@ -8,18 +8,35 @@ cfg_path = os.path.join(os.getcwd(),'dwh.cfg')
 config.read(cfg_path)
 
 def drop_tables(cur, conn):
+    """
+    Drop tables in Redshift as defined in sql_queries.py.
+
+    :param cur: A cursor object that allows Python code to execute PostgreSQL commands.
+    :param conn: A PostgreSQL database connection object that represents the database session.
+
+    :returns: None
+    """
     for query in drop_table_queries:
         cur.execute(query)
         conn.commit()
 
 
 def create_tables(cur, conn):
+    """
+    Create tables in Redshift as defined in sql_queries.py.
+
+    :param cur: A cursor object that allows Python code to execute PostgreSQL commands.
+    :param conn: A PostgreSQL database connection object that represents the database session.
+
+    :returns: None
+    """
     for query in create_table_queries:
         cur.execute(query)
         conn.commit()
 
 
 def main():
+    """Read in the configs, connect to Redshift, drop any tables and create tables as defined in sql_queries.py."""
     config = configparser.ConfigParser()
     config.read('dwh.cfg')
 
